@@ -24,29 +24,53 @@
         50% { transform: translateX(calc(var(--drift, 0px) * 0.5)) translateY(-40vh) rotate(20deg); opacity: 0.75; }
         100% { transform: translateX(var(--drift, 0px)) translateY(-110vh) rotate(40deg); opacity: 0; }
       }
-      /* Mobile: smaller top buttons for compact layout */
+      /* ── Button bar ── */
+      .btn-bar { display:flex; flex-wrap:nowrap; gap:8px; justify-content:center; align-items:stretch; }
+      .bbtn { display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:10px 16px; border-radius:14px; font-weight:700; font-size:0.92rem; text-decoration:none; cursor:pointer; transition:transform .12s, box-shadow .12s; white-space:nowrap; border:none; }
+      .bbtn:hover { transform:translateY(-2px); }
+      .bbtn-menu  { background:#fff; color:#1e293b; border:1px solid #e2e8f0; box-shadow:0 2px 8px rgba(0,0,0,0.06); flex:0 0 auto; }
+      .bbtn-primary { background:linear-gradient(90deg,#3b82f6,#2563eb); color:#fff; box-shadow:0 6px 18px rgba(37,99,235,0.22); flex:1 1 auto; }
+      .bbtn-secondary { background:#f1f5f9; color:#1e293b; border:1px solid #e2e8f0; flex:0 0 auto; }
+      /* Mobile: shorten labels so all 3 fit in one row */
+      @media (max-width: 500px) {
+        .bbtn { padding:10px 11px; font-size:0.83rem; gap:5px; }
+        .label-full { display:none; }
+        .label-short { display:inline; }
+      }
+      @media (min-width: 501px) {
+        .label-short { display:none; }
+      }
       @media (max-width: 640px) {
-        .flex.gap-2 { flex-direction: column; gap: 8px; }
-        .flex.gap-2 > a, .flex.gap-2 > button { padding: 0.7rem 0.9rem !important; font-size: 1rem !important; width: 100%; display:block; }
-        #board { gap: 4px; width: min(92vw, 520px); aspect-ratio: 1 / 1; grid-template-columns: repeat(5, 1fr); margin: 0 auto; }
-        /* slightly larger touch targets below */
+        #board { gap: 3px; width: 100%; aspect-ratio: 1 / 1; grid-template-columns: repeat(5, 1fr); margin: 0 auto; }
         .text-sm { font-size: 0.98rem; }
       }
       /* Respect device safe-area (notches) */
       body { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
     </style>
   </head>
-  <body class="bg-gray-100 min-h-screen flex sm:items-center items-start justify-center p-4">
+  <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
     <div class="hearts-container" id="heartsContainer"></div>
     <div class="max-w-lg w-full relative z-10">
 
 
-      <section id="gameSection" class="bg-white rounded-lg shadow p-4">
+      <section id="gameSection" class="bg-white rounded-lg shadow p-4 overflow-hidden">
         <!-- Buttons on top (always) -->
-        <div class="flex gap-2 justify-center mb-3">
-          <a href="index.html" class="px-4 py-2 bg-white text-gray-800 rounded-lg shadow hover:bg-gray-50 border">← Menu</a>
-          <button id="shuffleBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">Novo Jogo</button>
-          <button id="solveBtn" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg shadow hover:bg-gray-300">Mostrar solução</button>
+        <div class="btn-bar mb-3">
+          <a href="index.html" class="bbtn bbtn-menu" aria-label="Voltar ao menu">
+            ←
+            <span class="label-full">Menu</span>
+            <span class="label-short">Menu</span>
+          </a>
+          <button id="shuffleBtn" class="bbtn bbtn-primary" aria-label="Novo Jogo">
+            🔀
+            <span class="label-full">Novo Jogo</span>
+            <span class="label-short">Novo</span>
+          </button>
+          <button id="solveBtn" class="bbtn bbtn-secondary" aria-label="Mostrar solução">
+            💡
+            <span class="label-full">Mostrar solução</span>
+            <span class="label-short">Solução</span>
+          </button>
         </div>
 
         <div id="board" class="grid gap-2 touch-none">
