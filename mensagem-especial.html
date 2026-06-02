@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mensagem Especial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* ── layout ── */
+      html, body {
+        min-height: 100vh;
+        margin: 0;
+        font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      }
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 16px;
+        padding-top: max(24px, env(safe-area-inset-top));
+        padding-bottom: max(24px, env(safe-area-inset-bottom));
+        background:
+          radial-gradient(circle at 10% 20%, #fff0f6 0%, transparent 20%),
+          radial-gradient(circle at 90% 80%, #ffeef8 0%, transparent 25%),
+          linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #f6f1ff 100%);
+      }
+      /* ── hearts bg ── */
+      .hearts-container { position: fixed; inset: 0; overflow: hidden; z-index: 0; pointer-events: none; }
+      .heart { position: fixed; pointer-events: none; opacity: 0.95; transform: translateY(0); animation: up 8s linear infinite; }
+      @keyframes up {
+        0%   { transform: translateY(0)     scale(1);   opacity: 1; }
+        80%  {                                           opacity: 0.8; }
+        100% { transform: translateY(-120vh) scale(1.1); opacity: 0; }
+      }
+      /* ── card ── */
+      .stage { width: 100%; max-width: 760px; z-index: 2; }
+      .card {
+        background: rgba(255,255,255,0.75);
+        border-radius: 18px;
+        padding: 36px 40px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255,255,255,0.6);
+        text-align: center;
+      }
+      .title    { font-size: 2.2rem;  color: #c63382; font-weight: 800; letter-spacing: -0.01em; }
+      .subtitle { color: #6b2a47;     font-weight: 600; margin-top: 6px; }
+      .message  { margin-top: 18px;   color: #5b4150; line-height: 1.7; font-size: 1.05rem; }
+      .flowers  { margin-top: 18px;   display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+      .btns     { margin-top: 24px;   display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+      .btn {
+        padding: 12px 22px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 1rem;
+        text-decoration: none;
+        box-shadow: 0 6px 18px rgba(198,75,126,0.18);
+        transition: opacity .15s;
+      }
+      .btn:hover { opacity: .88; }
+      /* ── mobile ── */
+      @media (max-width: 640px) {
+        body     { align-items: flex-start; }
+        .card    { padding: 22px 18px; border-radius: 14px; }
+        .title   { font-size: 1.65rem; }
+        .message { font-size: 0.97rem; }
+        .btns    { flex-direction: column; gap: 10px; }
+        .btns .btn { width: 100%; padding: 14px 16px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="hearts-container" id="heartsContainer"></div>
+
+    <main class="stage">
+      <section class="card">
+        <div class="title">Para você, com todo carinho</div>
+        <div class="subtitle">Uma pequena lembrança do quanto você é especial</div>
+
+        <p class="message">Olá, Tailane! Se você está lendo isso, é porque encontrou um cantinho reservado só para você. E aqui vai uma mensagem que vem do fundo do coração: você é incrível, única e merece todo o amor e felicidade do mundo.
+          <br><br>
+          Às vezes as palavras não bastam para expressar a doçura que você espalha ao seu redor. Sua gentileza toca quem está perto, seu sorriso acende dias nublados e seu cuidado transforma momentos simples em memórias preciosas. Você é luz, coragem e ternura, tudo junto e merece que digam isso sempre.
+          <br><br>
+          Obrigado por ser quem você é: generosa, atenciosa e incrivelmente especial. Que cada passo seu seja acompanhado por alegria, e que você nunca esqueça o quanto importa para tantas pessoas.
+        </p>
+
+        <div class="flowers" aria-hidden>
+          <span style="font-size:24px">🌸</span>
+          <span style="font-size:24px">🌼</span>
+          <span style="font-size:24px">🌷</span>
+          <span style="font-size:24px">💐</span>
+        </div>
+
+        <div class="btns">
+          <a class="btn bg-pink-600 text-white" href="index.html">← Voltar ao Menu</a>
+          <a class="btn bg-rose-500 text-white" href="quebra-cabeca.html">Jogar Quebra-Cabeça 🧩</a>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      // spawn soft floating hearts for atmosphere
+      (function(){
+        const container = document.getElementById('heartsContainer');
+        if(!container) return;
+        const colors = ['#ff6b9a','#ff9ab8','#ffb3c6','#ffd1e6'];
+        function spawn(){
+          const h = document.createElement('div');
+          h.className = 'heart';
+          h.textContent = '❤';
+          h.style.left = (10 + Math.random()*80) + '%';
+          h.style.fontSize = (12 + Math.random()*28) + 'px';
+          h.style.color = colors[Math.floor(Math.random()*colors.length)];
+          h.style.animationDuration = (5000 + Math.random()*7000) + 'ms';
+          h.style.opacity = 0.9;
+          container.appendChild(h);
+          setTimeout(()=>{ h.remove(); }, 12000);
+        }
+        setInterval(spawn, 450);
+      })();
+    </script>
+  </body>
+</html>

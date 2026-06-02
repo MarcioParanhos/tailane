@@ -217,6 +217,8 @@ if (startBtn) {
   init();
 }
 
+
+
 // Hearts background: create floating hearts behind the UI
 function startHearts() {
   if (!heartsContainer) return;
