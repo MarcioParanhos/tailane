@@ -46,6 +46,20 @@
       }
       /* Respect device safe-area (notches) */
       body { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+      /* Hint overlay (centered, animated) */
+      .hint-overlay{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(2,6,23,0.52); backdrop-filter: blur(4px); z-index:60; padding:18px; }
+      .hint-overlay.hidden{ display:none !important; }
+      .hint-card{ width:min(720px,92%); background: linear-gradient(180deg,#ffffff,#f8fafc); color:#0f172a; padding:18px 18px; border-radius:14px; box-shadow:0 20px 50px rgba(2,6,23,0.28); display:flex; gap:16px; align-items:flex-start; transform:translateY(8px) scale(.98); animation: popIn .36s cubic-bezier(.2,.9,.3,1) both; }
+      .hint-icon{ width:56px; height:56px; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; color:white; background:linear-gradient(90deg,#06b6d4,#7c3aed); box-shadow: 0 10px 30px rgba(99,102,241,0.14); flex:0 0 56px; }
+      .hint-body{ flex:1 1 auto; }
+      .hint-body h3{ margin:0; font-size:1.15rem; font-weight:800; color:#0f172a; }
+      .hint-body p{ margin:8px 0 0; color:#475569; line-height:1.35; }
+      .hint-actions{ margin-top:12px; display:flex; gap:8px; }
+      .hint-actions button{ padding:8px 12px; border-radius:10px; border:none; cursor:pointer; font-weight:700; }
+      .hint-actions .calm{ background:#e6f4ff; color:#0b5cff; }
+      .hint-actions .solve{ background:linear-gradient(90deg,#10b981,#059669); color:#052014; }
+      .hint-close{ margin-left:12px; background:transparent; border:none; font-size:18px; cursor:pointer; color:#475569; }
+      @keyframes popIn{ from{ transform: translateY(8px) scale(.98); opacity:0; } to{ transform: translateY(0) scale(1); opacity:1; } }
     </style>
   </head>
   <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
@@ -102,6 +116,31 @@
         </div>
 
         <div id="winMsg" class="mt-4 hidden text-center text-green-700 font-semibold">Parabéns — você resolveu!</div>
+        <div id="hint" class="hint-overlay hidden" role="status" aria-live="polite">
+          <div class="hint-card">
+            <div class="hint-icon" aria-hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M4 11a1 1 0 0 1 .117 1.993l-.117 .007h-1a1 1 0 0 1 -.117 -1.993l.117 -.007h1z" />
+                <path d="M12 2a1 1 0 0 1 .993 .883l.007 .117v1a1 1 0 0 1 -1.993 .117l-.007 -.117v-1a1 1 0 0 1 1 -1z" />
+                <path d="M21 11a1 1 0 0 1 .117 1.993l-.117 .007h-1a1 1 0 0 1 -.117 -1.993l.117 -.007h1z" />
+                <path d="M4.893 4.893a1 1 0 0 1 1.32 -.083l.094 .083l.7 .7a1 1 0 0 1 -1.32 1.497l-.094 -.083l-.7 -.7a1 1 0 0 1 0 -1.414z" />
+                <path d="M17.693 4.893a1 1 0 0 1 1.497 1.32l-.083 .094l-.7 .7a1 1 0 0 1 -1.497 -1.32l.083 -.094l.7 -.7z" />
+                <path d="M14 18a1 1 0 0 1 1 1a3 3 0 0 1 -6 0a1 1 0 0 1 .883 -.993l.117 -.007h4z" />
+                <path d="M12 6a6 6 0 0 1 3.6 10.8a1 1 0 0 1 -.471 .192l-.129 .008h-6a1 1 0 0 1 -.6 -.2a6 6 0 0 1 3.6 -10.8z" />
+              </svg>
+            </div>
+            <div class="hint-body">
+              <h3 id="hintTitle">Tailane — dica amiga</h3>
+              <p id="hintMsg">Acho que você não vai conseguir... respira um pouco e descansa kkkkkkkkkk</p>
+              <div class="hint-actions">
+                <button class="calm" onclick="document.getElementById('hint').classList.add('hidden')">Eu me recuso a desistir</button>
+                <button class="solve" onclick="(function(){ document.getElementById('hint').classList.add('hidden'); document.getElementById('solveBtn').click(); })()">Mostrar solução</button>
+              </div>
+            </div>
+            <button class="hint-close" onclick="document.getElementById('hint').classList.add('hidden')" aria-label="Fechar">✕</button>
+          </div>
+        </div>
       </section>
 
     </div>

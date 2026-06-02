@@ -13,6 +13,8 @@ const heartsContainer = document.getElementById('heartsContainer');
 
 let state = [];
 let moves = 0;
+let hintShown500 = false;
+let hintShown1000 = false;
 
 /* ─────────────────────────────────────────────
    Recorta a imagem ao centro, tornando-a
@@ -49,6 +51,8 @@ function prepareImage(src, callback) {
 
 function init() {
   SIZE = 5; // fixed 5x5 as requested
+  hintShown500 = false;
+  hintShown1000 = false;
   boardEl.style.gridTemplateColumns = `repeat(${SIZE}, minmax(0, 1fr))`;
   moves = 0;
   movesEl.textContent = moves;
@@ -175,6 +179,23 @@ function tryMove(idx) {
     [state[idx], state[emptyIdx]] = [state[emptyIdx], state[idx]];
     moves++;
     render();
+    // show hints at two thresholds: 500 and 1000 moves
+    try {
+      const hintEl = document.getElementById('hint');
+      const titleEl = document.getElementById('hintTitle');
+      const msgEl = document.getElementById('hintMsg');
+      if (moves > 1000 && !hintShown1000) {
+        hintShown1000 = true;
+        if (titleEl) titleEl.textContent = "Rapaz... você nao desiste";
+        if (msgEl) msgEl.textContent = "tome um copo d'agua ou entao clique em mostrar solução, vc não vai conseguir é muito dificil";
+        hintEl.classList.remove('hidden');
+      } else if (moves > 500 && !hintShown500) {
+        hintShown500 = true;
+        if (titleEl) titleEl.textContent = "Tailane — dica amiga";
+        if (msgEl) msgEl.textContent = "Acho que você não vai conseguir... respira um pouco e descansa kkkkkkkkkk";
+        hintEl.classList.remove('hidden');
+      }
+    } catch(e){}
   }
 }
 
@@ -191,6 +212,10 @@ shuffleBtn.addEventListener('click', () => {
   moves = 0;
   movesEl.textContent = moves;
   winMsg.classList.add('hidden');
+  // allow hint to show again on new game and hide overlay if visible
+  hintShown500 = false;
+  hintShown1000 = false;
+  try{ document.getElementById('hint').classList.add('hidden'); }catch(e){}
   render();
 });
 
