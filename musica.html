@@ -10,7 +10,10 @@
       .wrap{ max-width:1200px; margin: 0 auto; display:grid; grid-template-columns: 320px 1fr; gap:28px; align-items:start; }
       .sidebar{ background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); padding:20px; border-radius:14px; }
       .logo{ font-weight:800; color:#1db954; font-size:20px; display:flex; gap:8px; align-items:center; }
-      .playlist li{ list-style:none; padding:10px 8px; border-radius:8px; display:flex; gap:10px; align-items:center; color:#b9d6cf; }
+        .playlist li{ list-style:none; padding:10px 8px; border-radius:8px; display:flex; gap:10px; align-items:center; color:#b9d6cf; }
+      .dot{ width:10px; height:10px; border-radius:50%; background:#1db954; display:inline-block; margin-right:8px; box-shadow:0 0 0 rgba(29,185,84,0); vertical-align:middle; transition:transform .18s ease, box-shadow .18s ease; opacity:0.95; }
+      .dot.playing{ animation: blink 1000ms infinite; box-shadow: 0 0 18px rgba(29,185,84,0.18); transform:scale(1.05); }
+      @keyframes blink{ 0%{ transform:scale(0.92); opacity:0.6; } 50%{ transform:scale(1.15); opacity:1; } 100%{ transform:scale(0.92); opacity:0.6; } }
       .playlist li.active{ background: rgba(29,185,84,0.12); color:#eafff1; }
       .cover{ width:220px; height:220px; border-radius:12px; background-size:cover; background-position:center; box-shadow: 0 14px 40px rgba(0,0,0,0.6); }
       .nowplaying{ background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02)); padding:20px; border-radius:12px; }
@@ -56,7 +59,7 @@
       <aside class="sidebar">
         <div class="logo"> <span style="font-size:22px;">🎧</span> Playlist</div>
         <ul class="playlist mt-4">
-          <li class="active"><span style="width:8px;height:8px;border-radius:50%;background:#1db954;display:inline-block;margin-right:8px"></span> <span id="sidebarNow">Agora tocando — "Ame"</span></li>
+          <li class="active"><span id="sidebarDot" class="dot" aria-hidden></span> <span id="sidebarNow">Agora tocando — "Ame"</span></li>
         </ul>
       </aside>
 
@@ -102,6 +105,7 @@
       const currentEl  = document.getElementById('current');
       const durationEl = document.getElementById('duration');
       const audio      = document.getElementById('audio');
+      const sidebarDot = document.getElementById('sidebarDot');
 
       let timer = null;
 
@@ -148,10 +152,12 @@
         playBtn.textContent = '❚❚';
         if(timer) clearInterval(timer);
         timer = setInterval(()=>{}, 1000);
+        if(sidebarDot) sidebarDot.classList.add('playing');
       });
       audio.addEventListener('pause', ()=>{
         playBtn.textContent = '▶︎';
         if(timer) clearInterval(timer); timer=null;
+        if(sidebarDot) sidebarDot.classList.remove('playing');
       });
 
       playBtn.addEventListener('click', ()=>{
