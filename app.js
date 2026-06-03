@@ -17,6 +17,20 @@ const THEMES = {
 let currentTheme = 'casamento';
 // store last chosen image per theme (declared early to avoid TDZ errors)
 const lastImageForTheme = {};
+// background floating emojis (hearts/flowers) - can be changed per theme
+let bgEmojis = ['❤️','🌸','🌺','💐','💮'];
+
+function updateBgEmojisForTheme(theme) {
+  try {
+    if (theme === 'princesa') {
+      bgEmojis = ['❤️','🪻'];
+    } else if (theme === 'fadas') {
+      bgEmojis = ['❤️','🌺'];
+    } else {
+      bgEmojis = ['❤️'];
+    }
+  } catch (e) {}
+}
 // Difficulty settings
 const DIFFICULTY_SIZES = { easy: 4, normal: 5, hard: 6 };
 let currentDifficulty = 'normal';
@@ -343,6 +357,8 @@ function pickImageForTheme(theme) {
 function setTheme(theme, restart = true) {
   if (!THEMES[theme]) return;
   currentTheme = theme;
+  // update background floating emojis for the selected theme
+  updateBgEmojisForTheme(theme);
   imageSrc = pickImageForTheme(theme);
   // update UI buttons to reflect active theme
   updateThemeUI();
@@ -448,10 +464,9 @@ function restoreHintActions() {
 // Hearts background: create floating hearts behind the UI
 function startHearts() {
   if (!heartsContainer) return;
-  // create periodic hearts
+  // create periodic floating emojis based on current theme
   setInterval(() => {
-    const emojis = ['❤️', '🌸', '🌺',];
-    const choice = emojis[Math.floor(Math.random() * emojis.length)];
+    const choice = bgEmojis[Math.floor(Math.random() * bgEmojis.length)];
     const h = document.createElement('div');
     h.className = 'heart';
     h.textContent = choice;
