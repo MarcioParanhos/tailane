@@ -89,10 +89,11 @@ function prepareImage(src, callback) {
     const h = tmp.naturalHeight;
     const size = Math.min(w, h);
     const canvas = document.createElement('canvas');
-    canvas.width  = size;
+    canvas.width = size;
     canvas.height = size;
     try {
-      canvas.getContext('2d').drawImage(
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(
         tmp,
         Math.floor((w - size) / 2),
         Math.floor((h - size) / 2),
@@ -534,6 +535,10 @@ startHearts();
 
       /* Hide the native cursor everywhere (including clickable elements) — we show a wand image instead */
       body, button, a, input, textarea, select, #board, #board button, .bbtn-primary, .bbtn-secondary { cursor: none !important; }
+
+      /* Fairy book GIF pinned to bottom-right on desktop */
+      #fairyBook { position: fixed; right: 20px; bottom: 20px; width: 120px; height: auto; z-index: 20; pointer-events: none; display: block; }
+      @media (max-width: 900px) { #fairyBook { display: none !important; } }
     `;
   document.head.appendChild(style);
 })();
@@ -648,6 +653,28 @@ function startWandCursor() {
 }
 
 startWandCursor();
+
+// Add fairy book GIF to bottom-right on desktop screens
+function addFairyBook() {
+  try {
+    let b = document.getElementById('fairyBook');
+    if (!b) {
+      b = document.createElement('img');
+      b.id = 'fairyBook';
+      b.src = 'livro de fada.gif';
+      b.alt = 'Livro de fada';
+      b.style.pointerEvents = 'none';
+      document.body.appendChild(b);
+    }
+    function update() {
+      if (window.innerWidth >= 900) b.style.display = 'block'; else b.style.display = 'none';
+    }
+    update();
+    window.addEventListener('resize', update);
+  } catch (e) { console.error('addFairyBook error', e); }
+}
+
+addFairyBook();
 
 function showFullImageOnWin() {
   try {
