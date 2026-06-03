@@ -627,17 +627,19 @@ function startWandCursor() {
     img.style.height = 'auto';
     img.style.pointerEvents = 'none';
     img.style.zIndex = '120';
-    img.style.transform = 'translate(-10px,-34px)';
-    img.style.transition = 'left 0.02s linear, top 0.02s linear';
+    img.style.transition = 'left 0.02s linear, top 0.02s linear, transform 120ms linear';
     document.body.appendChild(img);
     // hide native cursor so wand is visible everywhere
     try { document.body.style.cursor = 'none'; } catch(e){}
 
+    // hotspot offsets: adjust these so the wand tip aligns with pointer
+    const hotspot = { x: 8, y: 34 };
     function onMove(e) {
       const x = e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX;
       const y = e.touches && e.touches[0] ? e.touches[0].clientY : e.clientY;
-      img.style.left = x + 'px';
-      img.style.top = y + 'px';
+      // position the image so the hotspot pixel is exactly at the pointer
+      img.style.left = (x - hotspot.x) + 'px';
+      img.style.top = (y - hotspot.y) + 'px';
     }
 
     document.addEventListener('mousemove', onMove, { passive: true });
