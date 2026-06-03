@@ -538,7 +538,10 @@ startHearts();
 
       /* Fairy book GIF pinned to bottom-right on desktop */
       #fairyBook { position: fixed; right: 20px; bottom: 20px; width: 120px; height: auto; z-index: 20; pointer-events: none; display: block; }
-      @media (max-width: 900px) { #fairyBook { display: none !important; } }
+      /* On small screens show a smaller fairy book in the corner instead of hiding it */
+      @media (max-width: 900px) {
+        #fairyBook { display: block !important; width: 64px; right: 12px; bottom: 12px; opacity: 0.95; pointer-events: auto; }
+      }
     `;
   document.head.appendChild(style);
 })();
