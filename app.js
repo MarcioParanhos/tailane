@@ -530,8 +530,11 @@ startHearts();
       0% { opacity: 1; transform: translateY(0) scale(0.4) rotate(0deg); filter: blur(0px); }
       40% { opacity: 0.95; transform: translateY(-8px) scale(1.12) rotate(18deg); filter: blur(0.4px); }
       100% { opacity: 0; transform: translateY(-48px) scale(0.8) rotate(92deg); filter: blur(1.6px); }
-    }
-  `;
+      }
+
+      /* Hide the native cursor everywhere (including clickable elements) — we show a wand image instead */
+      body, button, a, input, textarea, select, #board, #board button, .bbtn-primary, .bbtn-secondary { cursor: none !important; }
+    `;
   document.head.appendChild(style);
 })();
 
@@ -608,6 +611,41 @@ function startFairyDust() {
 }
 
 startFairyDust();
+
+// Custom wand cursor: show `varinha.webp` following the pointer and hide native cursor
+function startWandCursor() {
+  try {
+    if (document.getElementById('wandCursor')) return;
+    const img = document.createElement('img');
+    img.id = 'wandCursor';
+    img.src = 'varinha.webp';
+    img.alt = 'varinha';
+    img.style.position = 'fixed';
+    img.style.left = '0px';
+    img.style.top = '0px';
+    img.style.width = '44px';
+    img.style.height = 'auto';
+    img.style.pointerEvents = 'none';
+    img.style.zIndex = '120';
+    img.style.transform = 'translate(-10px,-34px)';
+    img.style.transition = 'left 0.02s linear, top 0.02s linear';
+    document.body.appendChild(img);
+    // hide native cursor so wand is visible everywhere
+    try { document.body.style.cursor = 'none'; } catch(e){}
+
+    function onMove(e) {
+      const x = e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX;
+      const y = e.touches && e.touches[0] ? e.touches[0].clientY : e.clientY;
+      img.style.left = x + 'px';
+      img.style.top = y + 'px';
+    }
+
+    document.addEventListener('mousemove', onMove, { passive: true });
+    document.addEventListener('touchmove', onMove, { passive: true });
+  } catch (e) { console.error('startWandCursor error', e); }
+}
+
+startWandCursor();
 
 function showFullImageOnWin() {
   try {
