@@ -59,6 +59,7 @@ let moves = 0;
 let hintShown500 = false;
 let hintShown1000 = false;
 let hintShown2000 = false;
+let _confettiTimeout = null;
 
 /* ─────────────────────────────────────────────
    Recorta a imagem ao centro, tornando-a
@@ -103,6 +104,8 @@ function init() {
   moves = 0;
   movesEl.textContent = moves;
   winMsg.classList.add('hidden');
+  // remove any previous win overlay when starting a new game
+  removeWinOverlay();
   boardEl.innerHTML = '<p class="col-span-full text-center text-gray-400 text-sm py-8">Carregando…</p>';
 
   prepareImage(imageSrc, () => {
@@ -209,7 +212,10 @@ function render() {
   }
 
   movesEl.textContent = moves;
-  if (isSolved()) winMsg.classList.remove('hidden');
+  if (isSolved()) {
+    winMsg.classList.remove('hidden');
+    showFullImageOnWin();
+  }
 }
 
 // no image upload: uses default `imageSrc` (foto001.jpeg)
@@ -289,6 +295,8 @@ shuffleBtn.addEventListener('click', () => {
   hintShown1000 = false;
   hintShown2000 = false;
   try{ document.getElementById('hint').classList.add('hidden'); }catch(e){}
+  // remove full-image overlay if present
+  removeWinOverlay();
   render();
 });
 
@@ -476,6 +484,142 @@ startHearts();
     }
     #board button { transition: transform 0.08s, opacity 0.08s; }
     #board button:active { opacity: 0.82; transform: scale(0.96); }
+    /* Full-image overlay shown on puzzle completion */
+    #winOverlay { position: fixed; inset: 0; display:flex; align-items:center; justify-content:center; background: rgba(2,6,23,0.7); z-index:70; padding:18px; }
+    #winOverlay .win-card { max-width: 960px; width: min(96vw, 960px); max-height: 92vh; background: transparent; display:flex; align-items:center; justify-content:center; position:relative; }
+    #winOverlay img.win-image { width: 100%; height: auto; object-fit: contain; border-radius:10px; box-shadow: 0 20px 50px rgba(2,6,23,0.28); }
+    #winOverlay .win-close { position:absolute; top:8px; right:8px; background: rgba(255,255,255,0.9); border:none; border-radius:8px; padding:6px 8px; cursor:pointer; font-weight:700; }
+    /* Confetti pieces animation */
+    .confetti-piece { will-change: transform, opacity; }
+    @keyframes confetti-fall { 0% { transform: translateY(0) rotate(0deg); opacity:1 } 100% { transform: translateY(120vh) rotate(720deg); opacity:0 } }
+    /* Centered congratulations message */
+    #winOverlay .win-message { position: absolute; top: 10%; left: 50%; transform: translateX(-50%); background: linear-gradient(90deg,#06b6d4,#8b5cf6); color: white; padding:14px 18px; border-radius:12px; box-shadow: 0 12px 30px rgba(2,6,23,0.24); font-weight:800; font-size:1.05rem; z-index:80; text-align:center; display:flex; align-items:center; gap:10px; }
+    #winOverlay .win-message small { display:block; font-weight:600; opacity:0.95; margin-top:6px; font-size:0.92rem; }
+    #winOverlay .win-message .msg-close { background: transparent; border: none; color: rgba(255,255,255,0.95); font-weight:900; margin-left:8px; cursor:pointer; }
+    /* Animated icons around the message */
+    .win-anim-icons { position:absolute; inset:0; pointer-events:none; }
+    .win-anim-icons span { position:absolute; font-size:22px; opacity:0; transform: translateY(0) scale(0.8); animation: icon-pop 1400ms cubic-bezier(.2,.9,.3,1) forwards; }
+    @keyframes icon-pop { 0% { opacity:0; transform: translateY(6px) scale(0.8) rotate(0deg) } 30% { opacity:1; transform: translateY(-6px) scale(1.08) rotate(20deg) } 100% { opacity:1; transform: translateY(-28px) scale(1) rotate(360deg) } }
+    /* Subtle pulse for message */
+    @keyframes msg-pop { 0% { transform: translateX(-50%) scale(.96); opacity:0 } 60% { transform: translateX(-50%) scale(1.02); opacity:1 } 100% { transform: translateX(-50%) scale(1); opacity:1 } }
+    #winOverlay .win-message { animation: msg-pop .6s cubic-bezier(.2,.9,.3,1) both; }
   `;
   document.head.appendChild(style);
 })();
+
+function showFullImageOnWin() {
+  try {
+    // avoid creating multiple overlays
+    if (document.getElementById('winOverlay')) return;
+    const overlay = document.createElement('div');
+    overlay.id = 'winOverlay';
+    overlay.setAttribute('role','dialog');
+    overlay.setAttribute('aria-label','Imagem completa — puzzle resolvido');
+
+    const card = document.createElement('div');
+    card.className = 'win-card';
+
+    const img = document.createElement('img');
+    img.className = 'win-image';
+    img.src = imageSrc || squaredImageSrc;
+    img.alt = 'Imagem completa';
+
+    // centered congratulations message with animated icons and close
+    const msg = document.createElement('div');
+    msg.className = 'win-message';
+    msg.innerHTML = 'Parabéns — você concluiu o quebra-cabeças!<small>Ótimo trabalho 🎉</small>';
+    // close button inside message
+    const msgClose = document.createElement('button');
+    msgClose.className = 'msg-close';
+    msgClose.type = 'button';
+    msgClose.textContent = '✕';
+    msgClose.addEventListener('click', removeWinOverlay);
+    msg.appendChild(msgClose);
+    card.appendChild(msg);
+    // animated icons container
+    const icons = document.createElement('div');
+    icons.className = 'win-anim-icons';
+    const iconSet = ['🎉','✨','⭐','🥳','💫','👏','🎊'];
+    for (let i = 0; i < 8; i++) {
+      const sp = document.createElement('span');
+      sp.textContent = iconSet[i % iconSet.length];
+      // random position around the message
+      sp.style.left = (40 + Math.random() * 40) + '%';
+      sp.style.top = (6 + Math.random() * 18) + '%';
+      sp.style.fontSize = (18 + Math.random() * 18) + 'px';
+      sp.style.animationDelay = (i * 80) + 'ms';
+      icons.appendChild(sp);
+    }
+    card.appendChild(icons);
+
+    const btn = document.createElement('button');
+    btn.className = 'win-close';
+    btn.type = 'button';
+    btn.textContent = 'Fechar';
+    btn.addEventListener('click', removeWinOverlay);
+
+    card.appendChild(img);
+    card.appendChild(btn);
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+    // close overlay when clicking outside image
+    overlay.addEventListener('click', (ev)=>{ if (ev.target === overlay) removeWinOverlay(); });
+    // launch confetti celebration
+    launchConfetti(overlay);
+  } catch (e) { console.error('showFullImageOnWin error', e); }
+}
+
+function removeWinOverlay() {
+  try {
+    const ex = document.getElementById('winOverlay');
+    if (ex) ex.remove();
+    // remove any running confetti
+    removeConfetti();
+  } catch (e) {}
+}
+
+function launchConfetti(parentEl) {
+  try {
+    removeConfetti();
+    const overlay = parentEl || document.body;
+    const container = document.createElement('div');
+    container.id = 'confettiContainer';
+    container.style.position = 'absolute';
+    container.style.inset = '0';
+    container.style.pointerEvents = 'none';
+    container.style.overflow = 'visible';
+
+    const colors = ['#ef4444','#f97316','#f59e0b','#10b981','#06b6d4','#3b82f6','#8b5cf6','#ec4899'];
+    const pieces = 40;
+    for (let i = 0; i < pieces; i++) {
+      const p = document.createElement('div');
+      p.className = 'confetti-piece';
+      const left = Math.random() * 100;
+      const delay = Math.random() * 0.6;
+      const dur = 1800 + Math.random() * 2200;
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      p.style.background = color;
+      p.style.left = left + '%';
+      p.style.top = (20 + Math.random() * 10) + '%';
+      p.style.width = (6 + Math.random() * 8) + 'px';
+      p.style.height = (8 + Math.random() * 10) + 'px';
+      p.style.borderRadius = '2px';
+      p.style.opacity = '0.95';
+      p.style.transform = 'translateY(0) rotate(' + (Math.random()*360) + 'deg)';
+      p.style.animation = `confetti-fall ${dur}ms cubic-bezier(.2,.8,.2,1) ${delay}s forwards`;
+      p.style.position = 'absolute';
+      container.appendChild(p);
+    }
+    overlay.appendChild(container);
+    // auto remove confetti after 6s
+    _confettiTimeout = setTimeout(() => { removeConfetti(); }, 6000);
+  } catch (e) { console.error('launchConfetti error', e); }
+}
+
+function removeConfetti() {
+  try {
+    if (_confettiTimeout) { clearTimeout(_confettiTimeout); _confettiTimeout = null; }
+    const c = document.getElementById('confettiContainer');
+    if (c) c.remove();
+  } catch (e) { console.error('removeConfetti error', e); }
+}
