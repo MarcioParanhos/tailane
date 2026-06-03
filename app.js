@@ -1,6 +1,21 @@
 let SIZE = 5;
 let imageSrc = 'foto001.jpeg';
 let squaredImageSrc = imageSrc; // data URL quadrada gerada por canvas
+// Global error catcher to help diagnose runtime problems in the browser
+window.addEventListener('error', (ev) => {
+  try { alert('Erro no script: ' + (ev && ev.message ? ev.message : 'unknown')); } catch(e){}
+  console.error('Script error caught:', ev);
+});
+window.addEventListener('unhandledrejection', (ev)=>{ try{ alert('Promise rejeitada: '+(ev && ev.reason ? ev.reason : 'unknown')); }catch(e){}; console.error('Unhandled rejection', ev); });
+console.log('app.js loaded');
+// Theme configuration: map theme keys to one or more image filenames
+const THEMES = {
+  casamento: ['foto001.jpeg'],
+  fadas: ['fada001.jpeg', 'fada002.jpeg']
+};
+let currentTheme = 'casamento';
+// store last chosen image per theme (declared early to avoid TDZ errors)
+const lastImageForTheme = {};
 
 const boardEl     = document.getElementById('board');
 const movesEl     = document.getElementById('moves');
@@ -238,9 +253,84 @@ if (startBtn) {
     setTimeout(() => { if (gameSection) gameSection.scrollIntoView({ behavior: 'smooth' }); }, 80);
   });
 } else {
-  // fallback: start immediately
-  init();
+  // fallback: start immediately, set theme and init
+  setTheme(currentTheme, true);
 }
+
+// Theme helper: pick an image for a theme (if multiple images, pick randomly)
+function pickImageForTheme(theme) {
+  const list = THEMES[theme] || [imageSrc];
+  if (list.length === 1) {
+    lastImageForTheme[theme] = list[0];
+    return list[0];
+  }
+  const last = lastImageForTheme[theme];
+  // prefer images different from last; if all filtered out, fall back to full list
+  const candidates = last ? list.filter(i => i !== last) : list.slice();
+  const pickList = candidates.length ? candidates : list;
+  const choice = pickList[Math.floor(Math.random() * pickList.length)];
+  lastImageForTheme[theme] = choice;
+  return choice;
+}
+
+function setTheme(theme, restart = true) {
+  if (!THEMES[theme]) return;
+  currentTheme = theme;
+  imageSrc = pickImageForTheme(theme);
+  // update UI buttons to reflect active theme
+  updateThemeUI();
+  if (restart) init();
+}
+
+function updateThemeUI() {
+  try {
+    const btns = document.querySelectorAll('[data-theme]');
+    btns.forEach(btn => {
+      const key = btn.getAttribute('data-theme');
+      if (key === currentTheme) {
+        btn.classList.remove('bbtn-secondary');
+        btn.classList.add('bbtn-primary');
+        btn.setAttribute('aria-pressed','true');
+        // subtle focus style for selected theme
+        btn.style.boxShadow = '0 6px 18px rgba(37,99,235,0.12)';
+      } else {
+        btn.classList.remove('bbtn-primary');
+        btn.classList.add('bbtn-secondary');
+        btn.setAttribute('aria-pressed','false');
+        btn.style.boxShadow = 'none';
+      }
+    });
+  } catch (e) {}
+}
+
+// wire all theme buttons (handles any number of themes)
+try {
+  const themeBtns = document.querySelectorAll('[data-theme]');
+  themeBtns.forEach(b => {
+    b.addEventListener('click', (e) => {
+      const key = b.getAttribute('data-theme');
+      setTheme(key);
+    });
+  });
+} catch (e) {}
+
+// Top hamburger menu toggle
+(function wireTopMenu(){
+  const btn = document.getElementById('topMenuBtn');
+  const panel = document.getElementById('topMenuPanel');
+  if (!btn || !panel) return;
+  function openMenu(){ panel.classList.remove('hidden'); btn.setAttribute('aria-expanded','true'); panel.setAttribute('aria-hidden','false'); }
+  function closeMenu(){ panel.classList.add('hidden'); btn.setAttribute('aria-expanded','false'); panel.setAttribute('aria-hidden','true'); }
+  function toggleMenu(){ if (panel.classList.contains('hidden')) openMenu(); else closeMenu(); }
+  btn.addEventListener('click', (e)=>{ e.stopPropagation(); toggleMenu(); });
+  // close when clicking outside
+  document.addEventListener('click', (e)=>{ if (!panel.contains(e.target) && !btn.contains(e.target)) closeMenu(); });
+  // close on Esc
+  document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeMenu(); });
+  // ensure menu closes when navigation actions happen (like Solve / Shuffle)
+  try{ document.getElementById('shuffleBtn').addEventListener('click', closeMenu); }catch(e){}
+  try{ document.getElementById('solveBtn').addEventListener('click', closeMenu); }catch(e){}
+})();
 
 
 
