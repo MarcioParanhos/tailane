@@ -11,7 +11,8 @@ console.log('app.js loaded');
 // Theme configuration: map theme keys to one or more image filenames
 const THEMES = {
   casamento: ['foto001.jpeg'],
-  fadas: ['fada001.jpeg', 'fada002.jpeg']
+  fadas: ['fada001.jpeg'],
+  princesa: ['princesa001.jpeg']
 };
 let currentTheme = 'casamento';
 // store last chosen image per theme (declared early to avoid TDZ errors)
@@ -449,9 +450,12 @@ function startHearts() {
   if (!heartsContainer) return;
   // create periodic hearts
   setInterval(() => {
+    const emojis = ['❤️', '🌸', '🌺',];
+    const choice = emojis[Math.floor(Math.random() * emojis.length)];
     const h = document.createElement('div');
     h.className = 'heart';
-    h.textContent = '❤️';
+    h.textContent = choice;
+    // size variation per emoji
     const size = 12 + Math.random() * 36; // font-size px
     h.style.fontSize = size + 'px';
     const left = Math.random() * 100;

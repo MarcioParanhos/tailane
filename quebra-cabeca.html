@@ -81,11 +81,13 @@
         .text-sm { font-size: 0.98rem; }
       }
       /* Respect device safe-area (notches) */
-      body { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+      body { background-color: #CAC1FE; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+      /* Slight gradient for main game card to match background */
+      #gameSection { background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(236,233,255,0.6)); }
       /* Hint overlay (centered, animated) */
       .hint-overlay{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(2,6,23,0.52); backdrop-filter: blur(4px); z-index:60; padding:18px; }
       .hint-overlay.hidden{ display:none !important; }
-      .hint-card{ width:min(720px,92%); background: linear-gradient(180deg,#ffffff,#f8fafc); color:#0f172a; padding:18px 18px; border-radius:14px; box-shadow:0 20px 50px rgba(2,6,23,0.28); display:flex; gap:16px; align-items:flex-start; transform:translateY(8px) scale(.98); animation: popIn .36s cubic-bezier(.2,.9,.3,1) both; }
+      .hint-card{ width:min(720px,92%); background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(202,193,254,0.10)); color:#0f172a; padding:18px 18px; border-radius:14px; box-shadow:0 20px 50px rgba(2,6,23,0.18); display:flex; gap:16px; align-items:flex-start; transform:translateY(8px) scale(.98); animation: popIn .36s cubic-bezier(.2,.9,.3,1) both; }
       .hint-icon{ width:56px; height:56px; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; color:white; background:linear-gradient(90deg,#06b6d4,#7c3aed); box-shadow: 0 10px 30px rgba(99,102,241,0.14); flex:0 0 56px; }
       .hint-body{ flex:1 1 auto; }
       .hint-body h3{ margin:0; font-size:1.15rem; font-weight:800; color:#0f172a; }
@@ -98,7 +100,7 @@
       @keyframes popIn{ from{ transform: translateY(8px) scale(.98); opacity:0; } to{ transform: translateY(0) scale(1); opacity:1; } }
     </style>
   </head>
-  <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+  <body class="min-h-screen flex items-center justify-center p-4">
     <div class="hearts-container" id="heartsContainer"></div>
     <div class="max-w-lg w-full relative z-10">
 
@@ -150,6 +152,10 @@
             <button id="themeFadas" class="bbtn bbtn-secondary" data-theme="fadas" aria-pressed="false">
               <span class="label-full">Fadas</span>
               <span class="label-short">Fadas</span>
+            </button>
+            <button id="themePrincesa" class="bbtn bbtn-secondary" data-theme="princesa" aria-pressed="false">
+              <span class="label-full">Princesa</span>
+              <span class="label-short">Prin</span>
             </button>
           </div>
         </div>
