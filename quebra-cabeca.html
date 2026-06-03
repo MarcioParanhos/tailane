@@ -41,6 +41,10 @@
       .bbtn-menu  { background:#fff; color:#1e293b; border:1px solid #e2e8f0; box-shadow:0 2px 8px rgba(0,0,0,0.06); flex:0 0 auto; }
       .bbtn-primary { background:linear-gradient(90deg,#3b82f6,#2563eb); color:#fff; box-shadow:0 6px 18px rgba(37,99,235,0.22); flex:1 1 auto; }
       .bbtn-secondary { background:#f1f5f9; color:#1e293b; border:1px solid #e2e8f0; flex:0 0 auto; }
+      .difficulty-select { position:relative; }
+      .difficulty-select select { padding:8px 10px; padding-right:40px; border-radius:10px; min-width:120px; -webkit-appearance:none; appearance:none; background:#fff; }
+      .difficulty-select .select-icon { position:absolute; right:10px; top:50%; transform:translateY(-50%); width:20px; height:20px; color:#64748b; pointer-events:none; }
+      .difficulty-select label { display:none; }
       /* Mobile: shorten labels so all 3 fit in one row */
       @media (max-width: 500px) {
         .bbtn { padding:10px 11px; font-size:0.83rem; gap:5px; }
@@ -73,7 +77,7 @@
         .label-short { display:none; }
       }
       @media (max-width: 640px) {
-        #board { gap: 3px; width: 100%; aspect-ratio: 1 / 1; grid-template-columns: repeat(5, 1fr); margin: 0 auto; }
+        #board { gap: 3px; width: 100%; aspect-ratio: 1 / 1; margin: 0 auto; }
         .text-sm { font-size: 0.98rem; }
       }
       /* Respect device safe-area (notches) */
@@ -100,8 +104,23 @@
 
 
       <section id="gameSection" class="bg-white rounded-lg shadow p-4 overflow-hidden">
-        <!-- Compact hamburger menu to save space on top bar -->
+        <!-- Compact top bar: difficulty select in front of hamburger menu -->
         <div class="btn-bar mb-3 top-right">
+          <!-- Discrete difficulty select placed in front of the menu -->
+          <div class="difficulty-select" style="margin-right:8px; display:flex; align-items:center; position:relative;">
+            <label for="difficultySelect" style="margin-right:6px;color:#64748b;font-size:0.92rem;">Dificuldade</label>
+            <select id="difficultySelect" class="bbtn bbtn-secondary" aria-label="Selecionar dificuldade">
+              <option value="easy">Fácil</option>
+              <option value="normal">Normal</option>
+              <option value="hard">Difícil</option>
+            </select>
+            <!-- SVG icon to signal clickability -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="select-icon" aria-hidden>
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M18.707 8.293a1 1 0 0 1 0 1.414l-6 6a1 1 0 0 1 -1.414 0l-6 -6a1 1 0 0 1 1.414 -1.414l5.293 5.293l5.293 -5.293a1 1 0 0 1 1.414 0" />
+            </svg>
+          </div>
+
           <div style="position:relative;">
             <button id="topMenuBtn" class="bbtn bbtn-menu" aria-expanded="false" aria-label="Abrir menu">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden>
@@ -118,6 +137,7 @@
             </div>
           </div>
         </div>
+        
 
         <!-- Theme selector (label above, buttons in the next line; buttons equal width) -->
         <div class="theme-block mb-3" aria-label="Selecionar tema do quebra-cabeça">

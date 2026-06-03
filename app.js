@@ -16,6 +16,34 @@ const THEMES = {
 let currentTheme = 'casamento';
 // store last chosen image per theme (declared early to avoid TDZ errors)
 const lastImageForTheme = {};
+// Difficulty settings
+const DIFFICULTY_SIZES = { easy: 4, normal: 5, hard: 6 };
+let currentDifficulty = 'normal';
+
+function setDifficulty(diff, restart = true) {
+  if (!DIFFICULTY_SIZES[diff]) return;
+  currentDifficulty = diff;
+  updateDifficultyUI();
+  if (restart) init();
+}
+
+function updateDifficultyUI() {
+  try {
+    // if a select exists, sync its value
+    const sel = document.getElementById('difficultySelect');
+    if (sel) sel.value = currentDifficulty;
+    // fallback: if legacy buttons exist, apply visual state
+    const btns = document.querySelectorAll('[data-diff]');
+    btns.forEach(btn => {
+      const key = btn.getAttribute('data-diff');
+      if (key === currentDifficulty) {
+        btn.classList.remove('bbtn-secondary'); btn.classList.add('bbtn-primary'); btn.setAttribute('aria-pressed','true'); btn.style.boxShadow = '0 6px 18px rgba(37,99,235,0.12)';
+      } else {
+        btn.classList.remove('bbtn-primary'); btn.classList.add('bbtn-secondary'); btn.setAttribute('aria-pressed','false'); btn.style.boxShadow = 'none';
+      }
+    });
+  } catch (e) {}
+}
 
 const boardEl     = document.getElementById('board');
 const movesEl     = document.getElementById('moves');
@@ -30,6 +58,7 @@ let state = [];
 let moves = 0;
 let hintShown500 = false;
 let hintShown1000 = false;
+let hintShown2000 = false;
 
 /* ─────────────────────────────────────────────
    Recorta a imagem ao centro, tornando-a
@@ -65,9 +94,11 @@ function prepareImage(src, callback) {
 }
 
 function init() {
-  SIZE = 5; // fixed 5x5 as requested
+  // set SIZE from difficulty
+  SIZE = DIFFICULTY_SIZES[currentDifficulty] || 5;
   hintShown500 = false;
   hintShown1000 = false;
+  hintShown2000 = false;
   boardEl.style.gridTemplateColumns = `repeat(${SIZE}, minmax(0, 1fr))`;
   moves = 0;
   movesEl.textContent = moves;
@@ -210,6 +241,32 @@ function tryMove(idx) {
         if (msgEl) msgEl.textContent = "Acho que você não vai conseguir... respira um pouco e descansa kkkkkkkkkk";
         hintEl.classList.remove('hidden');
       }
+      // strongly suggest lowering difficulty at very high move counts
+      if (moves > 2 && !hintShown2000) {
+        hintShown2000 = true;
+        try {
+          if (titleEl) titleEl.textContent = 'Pausa — reduza a dificuldade';
+          if (msgEl) msgEl.textContent = "Esse nível exige um esforço intelectual muito grande. Recomendo diminuir a dificuldade para continuar.";
+          // replace actions with options: continuar or diminuir dificuldade
+          const actions = document.querySelector('.hint-actions');
+          if (actions) {
+            actions.innerHTML = '';
+            const btnContinue = document.createElement('button');
+            btnContinue.className = 'calm';
+            btnContinue.textContent = 'Continuar assim';
+            btnContinue.addEventListener('click', () => { if (hintEl) hintEl.classList.add('hidden'); restoreHintActions(); });
+
+            const btnReduce = document.createElement('button');
+            btnReduce.className = 'solve';
+            btnReduce.textContent = 'Diminuir dificuldade';
+            btnReduce.addEventListener('click', () => { if (hintEl) hintEl.classList.add('hidden'); reduceDifficulty(); restoreHintActions(); });
+
+            actions.appendChild(btnContinue);
+            actions.appendChild(btnReduce);
+          }
+        } catch (e) {}
+        if (hintEl) hintEl.classList.remove('hidden');
+      }
     } catch(e){}
   }
 }
@@ -230,6 +287,7 @@ shuffleBtn.addEventListener('click', () => {
   // allow hint to show again on new game and hide overlay if visible
   hintShown500 = false;
   hintShown1000 = false;
+  hintShown2000 = false;
   try{ document.getElementById('hint').classList.add('hidden'); }catch(e){}
   render();
 });
@@ -314,6 +372,20 @@ try {
   });
 } catch (e) {}
 
+// wire difficulty select (compact) or fallback to legacy buttons
+try{
+  const sel = document.getElementById('difficultySelect');
+  if (sel) {
+    sel.addEventListener('change', ()=> setDifficulty(sel.value));
+    sel.value = currentDifficulty;
+  } else {
+    const diffs = document.querySelectorAll('[data-diff]');
+    diffs.forEach(d => d.addEventListener('click', ()=> setDifficulty(d.getAttribute('data-diff'))));
+  }
+  // apply initial UI state
+  updateDifficultyUI();
+}catch(e){}
+
 // Top hamburger menu toggle
 (function wireTopMenu(){
   const btn = document.getElementById('topMenuBtn');
@@ -331,6 +403,36 @@ try {
   try{ document.getElementById('shuffleBtn').addEventListener('click', closeMenu); }catch(e){}
   try{ document.getElementById('solveBtn').addEventListener('click', closeMenu); }catch(e){}
 })();
+
+// helper to reduce difficulty by one step
+function reduceDifficulty() {
+  try {
+    if (currentDifficulty === 'hard') setDifficulty('normal');
+    else if (currentDifficulty === 'normal') setDifficulty('easy');
+    else {
+      // already easy — do nothing
+    }
+  } catch (e) {}
+}
+
+// restore default hint action buttons
+function restoreHintActions() {
+  try {
+    const actions = document.querySelector('.hint-actions');
+    if (!actions) return;
+    actions.innerHTML = '';
+    const btn1 = document.createElement('button');
+    btn1.className = 'calm';
+    btn1.textContent = 'Eu me recuso a desistir';
+    btn1.addEventListener('click', () => { document.getElementById('hint').classList.add('hidden'); });
+    const btn2 = document.createElement('button');
+    btn2.className = 'solve';
+    btn2.textContent = 'Mostrar solução';
+    btn2.addEventListener('click', () => { document.getElementById('hint').classList.add('hidden'); document.getElementById('solveBtn').click(); });
+    actions.appendChild(btn1);
+    actions.appendChild(btn2);
+  } catch (e) {}
+}
 
 
 
