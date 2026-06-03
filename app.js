@@ -663,8 +663,12 @@ function addFairyBook() {
       b.id = 'fairyBook';
       b.src = 'livro de fada.gif';
       b.alt = 'Livro de fada';
-      b.style.pointerEvents = 'none';
+      b.style.pointerEvents = 'auto';
+      // keep native cursor hidden here too so only the wand is visible
+      b.style.cursor = 'none';
       document.body.appendChild(b);
+      // open surprise and immediately unlock 'fadas' when clicked
+      b.addEventListener('click', (e) => { e.stopPropagation(); try{ unlockFadasButton(); }catch(_){}; setTheme('fadas'); showFairySurprise(); });
     }
     function update() {
       if (window.innerWidth >= 900) b.style.display = 'block'; else b.style.display = 'none';
@@ -675,6 +679,128 @@ function addFairyBook() {
 }
 
 addFairyBook();
+// Ensure 'fadas' theme is hidden on every page load (no persistence)
+try {
+  const fbtn = document.querySelector('[data-theme="fadas"]');
+  if (fbtn) fbtn.style.display = 'none';
+} catch(e) {}
+
+// Global unlock function so clicking the book can immediately reveal the theme
+function unlockFadasButton() {
+  try {
+    const btn = document.querySelector('[data-theme="fadas"]');
+    if (btn) {
+      btn.style.display = '';
+      try { btn.removeAttribute('aria-hidden'); } catch(e) {}
+      try {
+        btn.animate([{ transform: 'scale(.96)' }, { transform: 'scale(1.06)' }, { transform: 'scale(1)' }], { duration: 520, easing: 'cubic-bezier(.2,.9,.3,1)' });
+      } catch (e) {}
+    }
+    // do not persist unlock to storage — require unlocking each visit
+  } catch (e) { console.error('unlockFadasButton error', e); }
+}
+
+// Surprise opened when clicking the fairy book GIF
+function showFairySurprise() {
+  try {
+    // avoid duplicates
+    if (document.getElementById('fairySurprise')) return;
+    const overlay = document.createElement('div');
+    overlay.id = 'fairySurprise';
+    overlay.style.position = 'fixed';
+    overlay.style.inset = '0';
+    overlay.style.display = 'flex';
+    overlay.style.alignItems = 'center';
+    overlay.style.justifyContent = 'center';
+    overlay.style.background = 'rgba(2,6,23,0.6)';
+    overlay.style.zIndex = '140';
+    overlay.style.pointerEvents = 'auto';
+    overlay.style.padding = '18px';
+
+    const card = document.createElement('div');
+    card.style.background = 'linear-gradient(180deg,#fff,#f7eefc)';
+    card.style.borderRadius = '12px';
+    card.style.padding = '22px';
+    card.style.maxWidth = '640px';
+    card.style.width = 'min(92vw,640px)';
+    card.style.boxShadow = '0 20px 60px rgba(2,6,23,0.28)';
+    card.style.pointerEvents = 'auto';
+    card.style.zIndex = '141';
+    card.style.textAlign = 'center';
+
+    const h = document.createElement('h3');
+    h.textContent = 'Surpresa das Fadas!';
+    h.style.margin = '0 0 8px 0';
+    h.style.fontSize = '1.15rem';
+    h.style.fontWeight = '800';
+    h.style.color = '#6b21a8';
+
+    const p = document.createElement('p');
+    p.textContent = 'Tailane, você encontrou um livro mágico, parabéns!';
+    p.style.margin = '0 0 12px 0';
+    p.style.color = '#334155';
+
+    // build a more impressive fairy surprise (no internal close button)
+    const reveal = document.createElement('div');
+    reveal.style.marginBottom = '8px';
+    reveal.style.fontSize = '1rem';
+    reveal.style.color = '#6b21a8';
+    reveal.style.fontWeight = '700';
+    reveal.textContent = 'Uma magia das fadas aconteceu...';
+
+    const big = document.createElement('div');
+    big.style.fontSize = '1.8rem';
+    big.style.fontWeight = '900';
+    big.style.background = 'linear-gradient(90deg,#ff88d1,#f59be3,#a78bfa)';
+    big.style.webkitBackgroundClip = 'text';
+    big.style.backgroundClip = 'text';
+    big.style.color = 'transparent';
+    big.style.margin = '6px 0 12px 0';
+    big.textContent = 'Tema "Fadas" desbloqueado!';
+
+    // removed internal CTA — clicking the book now unlocks immediately
+
+    card.appendChild(h);
+    card.appendChild(reveal);
+    card.appendChild(big);
+    card.appendChild(p);
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+
+    // make overlay focusable for Escape key
+    overlay.tabIndex = -1;
+    try { overlay.focus(); } catch(e) {}
+    overlay.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') { overlay.remove(); removeConfetti(); } });
+
+    // create flying fairy/star particles programmatically
+    for (let i = 0; i < 18; i++) {
+      const s = document.createElement('div');
+      s.textContent = ['✨','🧚','🌟'][Math.floor(Math.random()*3)];
+      s.style.position = 'absolute';
+      s.style.left = (50 + (Math.random()-0.5)*40) + '%';
+      s.style.top = (55 + Math.random()*20) + '%';
+      const sz = 10 + Math.random()*28;
+      s.style.fontSize = sz + 'px';
+      s.style.opacity = '0';
+      s.style.transform = 'translate(-50%, -50%) scale(0.6)';
+      s.style.pointerEvents = 'none';
+      s.style.zIndex = '142';
+      overlay.appendChild(s);
+      // animate via JS (no extra CSS needed)
+      (function(el){
+        const dx = (Math.random()-0.5) * 220; const dy = -120 - Math.random()*260; const rot = (Math.random()-0.5)*720;
+        setTimeout(()=>{ el.style.transition = 'transform 1200ms cubic-bezier(.2,.9,.2,1), opacity 1200ms ease'; el.style.opacity = '1'; el.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg) scale(1)`; }, 60 + Math.random()*220);
+        setTimeout(()=>{ el.style.transition = 'opacity 600ms ease'; el.style.opacity = '0'; }, 1200 + Math.random()*1200);
+        setTimeout(()=>{ try{ el.remove(); }catch(e){} }, 2600 + Math.random()*1000);
+      })(s);
+    }
+
+    // small confetti celebration
+    launchConfetti(overlay);
+    // clicking outside closes
+    overlay.addEventListener('click', (ev) => { if (ev.target === overlay) { overlay.remove(); removeConfetti(); } });
+  } catch (e) { console.error('showFairySurprise error', e); }
+}
 
 function showFullImageOnWin() {
   try {
