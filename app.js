@@ -23,11 +23,11 @@ let bgEmojis = ['❤️','🌸','🌺','💐','💮'];
 function updateBgEmojisForTheme(theme) {
   try {
     if (theme === 'princesa') {
-      bgEmojis = ['❤️','🪻'];
+      bgEmojis = ['❤️','🪻','❤️','🪻'];
     } else if (theme === 'fadas') {
-      bgEmojis = ['❤️','🌺'];
+      bgEmojis = ['❤️','🌺','❤️','🌺'];
     } else {
-      bgEmojis = ['❤️'];
+      bgEmojis = ['❤️','❤️','❤️','❤️','❤️','❤️',];
     }
   } catch (e) {}
 }
@@ -522,9 +522,92 @@ startHearts();
     /* Subtle pulse for message */
     @keyframes msg-pop { 0% { transform: translateX(-50%) scale(.96); opacity:0 } 60% { transform: translateX(-50%) scale(1.02); opacity:1 } 100% { transform: translateX(-50%) scale(1); opacity:1 } }
     #winOverlay .win-message { animation: msg-pop .6s cubic-bezier(.2,.9,.3,1) both; }
+
+    /* Mouse fairy-dust pieces (small glowing stars) */
+    #mouseDustContainer { position: fixed; inset: 0; pointer-events: none; overflow: visible; z-index: 60; }
+    .dust-piece { position: absolute; pointer-events: none; transform-origin: center; will-change: transform, opacity; animation: dust-pop 900ms cubic-bezier(.2,.8,.2,1) forwards; text-shadow: 0 2px 6px rgba(255,130,190,0.14); font-weight: 600; line-height: 1; background: transparent; border-radius: 0; display: inline-block; padding: 0; }
+    @keyframes dust-pop {
+      0% { opacity: 1; transform: translateY(0) scale(0.4) rotate(0deg); filter: blur(0px); }
+      40% { opacity: 0.95; transform: translateY(-8px) scale(1.12) rotate(18deg); filter: blur(0.4px); }
+      100% { opacity: 0; transform: translateY(-48px) scale(0.8) rotate(92deg); filter: blur(1.6px); }
+    }
   `;
   document.head.appendChild(style);
 })();
+
+// Fairy dust mouse trail: pink sparkles emitted at mouse/touch position
+function startFairyDust() {
+  try {
+    // create container once
+    let container = document.getElementById('mouseDustContainer');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'mouseDustContainer';
+      container.style.position = 'fixed';
+      container.style.left = '0';
+      container.style.top = '0';
+      container.style.width = '100%';
+      container.style.height = '100%';
+      container.style.pointerEvents = 'none';
+      container.style.overflow = 'visible';
+      container.style.zIndex = '60';
+      document.body.appendChild(container);
+    }
+
+    function makeParticle(x, y) {
+      const p = document.createElement('span');
+      p.className = 'dust-piece';
+      // star characters for variety
+      const stars = ['✦','✶','✺','✨','✧'];
+      p.textContent = stars[Math.floor(Math.random() * stars.length)];
+      const size = 4 + Math.random() * 6; // much smaller px font-size
+      p.style.fontSize = size + 'px';
+      p.style.left = (x - size/2) + 'px';
+      p.style.top = (y - size/2) + 'px';
+      p.style.lineHeight = '1';
+      p.style.display = 'inline-block';
+      p.style.background = 'transparent';
+      p.style.borderRadius = '0';
+      // pink color variations
+      const pinks = ['#ff7ecb','#ff8ccf','#ff69b4','#ff99d6'];
+      p.style.color = pinks[Math.floor(Math.random() * pinks.length)];
+      p.style.opacity = String(0.95 - Math.random() * 0.6);
+      p.style.transform = 'translateZ(0)';
+      container.appendChild(p);
+      // remove after animation
+      setTimeout(() => { p.remove(); }, 700 + Math.random() * 700);
+    }
+
+    let lastEmit = 0;
+    function emitAt(clientX, clientY) {
+      const now = Date.now();
+      // throttle to ~60-120 particles/sec depending on movement
+      if (now - lastEmit < 16) return;
+      lastEmit = now;
+      const count = 1 + Math.floor(Math.random() * 3);
+      for (let i = 0; i < count; i++) {
+        // slight spread
+        const sx = clientX + (Math.random() - 0.5) * 18;
+        const sy = clientY + (Math.random() - 0.5) * 12;
+        makeParticle(sx, sy);
+      }
+    }
+
+    function onMove(e) {
+      if (e.touches && e.touches.length) {
+        const t = e.touches[0];
+        emitAt(t.clientX, t.clientY);
+      } else {
+        emitAt(e.clientX, e.clientY);
+      }
+    }
+
+    document.addEventListener('mousemove', onMove, { passive: true });
+    document.addEventListener('touchmove', onMove, { passive: true });
+  } catch (e) { console.error('startFairyDust error', e); }
+}
+
+startFairyDust();
 
 function showFullImageOnWin() {
   try {
