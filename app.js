@@ -533,7 +533,7 @@ function showFullImageOnWin() {
     msgClose.className = 'msg-close';
     msgClose.type = 'button';
     msgClose.textContent = '✕';
-    msgClose.addEventListener('click', removeWinOverlay);
+    msgClose.addEventListener('click', hideWinMessage);
     msg.appendChild(msgClose);
     card.appendChild(msg);
     // animated icons container
@@ -576,6 +576,17 @@ function removeWinOverlay() {
     // remove any running confetti
     removeConfetti();
   } catch (e) {}
+}
+
+function hideWinMessage() {
+  try {
+    const overlay = document.getElementById('winOverlay');
+    if (!overlay) return;
+    const msg = overlay.querySelector('.win-message');
+    const icons = overlay.querySelector('.win-anim-icons');
+    if (msg) msg.style.display = 'none';
+    if (icons) icons.style.display = 'none';
+  } catch (e) { console.error('hideWinMessage error', e); }
 }
 
 function launchConfetti(parentEl) {
