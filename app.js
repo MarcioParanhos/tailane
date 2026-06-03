@@ -242,7 +242,7 @@ function tryMove(idx) {
         hintEl.classList.remove('hidden');
       }
       // strongly suggest lowering difficulty at very high move counts
-      if (moves > 2 && !hintShown2000) {
+      if (moves > 2000 && !hintShown2000) {
         hintShown2000 = true;
         try {
           if (titleEl) titleEl.textContent = 'Pausa — reduza a dificuldade';
